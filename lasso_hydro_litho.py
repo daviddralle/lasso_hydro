@@ -63,7 +63,7 @@ def get_rechargefit(x0,Q, positive=True):
 		idx_train = np.random.choice(range(int(len(Q)/2),len(Q)-1), int(len(Q)*frac), replace=False)
 		idx_test = list(set(np.arange(int(len(Q)/2),len(Q))).difference(set(idx_train)))
 		traintest.append((idx_train, idx_test))
-	clf = linear_model.LassoCV(cv=traintest, positive=positive)
+	clf = linear_model.LassoCV(cv=traintest, positive=positive, n_jobs=-1)
 	clf.fit(H, Q)
 	return clf, np.copy(H), np.copy(Q), t
 
@@ -108,12 +108,17 @@ def main():
 	    Q = Q[np.isfinite(Q)]
 	    idx = np.min([len(Q), 2000])
 	    Q = Q[-idx:]
-	    res = minimize(get_score, x0,method='Nelder-Mead', tol=1e-6, n_jobs=-1,args = (Q, True, True))
+	    res = minimize(get_score, x0,method='Nelder-Mead', tol=1e-6, args = (Q, True, True))
 	    ress.append(res)
-	    break
-	print(res)
-
+	    
+	xs = [res.x for res in ress]
+	tempdf = pd.DataFrame(xs)
+	tempdf.to_csv('ress.csv')
 
 if __name__ == '__main__':
 	main()
+
+
+
+
 
