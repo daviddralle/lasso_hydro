@@ -1,6 +1,5 @@
 import pandas as pd 
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy import linalg
 from sklearn import linear_model
@@ -15,7 +14,6 @@ import time
 import warnings
 import sklearn
 from sklearn.metrics import r2_score
-warnings.filterwarnings('ignore')
 
 
 def getFlow(site,start,stop):
