@@ -6,6 +6,7 @@ from sklearn import linear_model
 from sklearn.linear_model import LassoCV
 from scipy.optimize import minimize
 import scipy
+import multiprocessing as mp
 
 # import geopandas as gpd
 import urllib
@@ -61,56 +62,56 @@ def get_rechargefit(x0,Q, positive=True):
 		idx_train = np.random.choice(range(int(len(Q)/2),len(Q)-1), int(len(Q)*frac), replace=False)
 		idx_test = list(set(np.arange(int(len(Q)/2),len(Q))).difference(set(idx_train)))
 		traintest.append((idx_train, idx_test))
-	clf = linear_model.LassoCV(cv=traintest, positive=positive, n_jobs=-1)
+	clf = linear_model.LassoCV(cv=traintest, positive=positive)
 	clf.fit(H, Q)
 	return clf, np.copy(H), np.copy(Q), t
 
-def get_score(x0,Q, positive=True, logtransform=False):
+def get_score(x0,Q, positive=True, logtransform=True):
 	clf, H, Q, t = get_rechargefit(x0,Q,positive)
 	rechargefit = clf.coef_
 	Qfit = np.dot(H, rechargefit)
 	idx = (Q>0)&(Qfit>0)
 	Q = Q[idx]
 	Qfit = Qfit[idx]
-	if logtransform:
-		return 1-r2_score(np.log(Q),np.log(Qfit))
+	if len(Qfit)==0:
+		return 1e13
 	else:
-		return 1-r2_score(Q,Qfit)
+		if logtransform:
+			return 1-r2_score(np.log(Q),np.log(Qfit))
+		else:
+			return 1-r2_score(Q,Qfit)
 
+def getmin(args):
+	f,x0,Q = args
+	res = minimize(f, x0,method='Nelder-Mead', tol=1e-4, args = (Q))
+	return res
 
 def main():
-	sites = ['11475800', '11475560', '11478500', '11472200']
-	dfs = []
-	print('grabbing site data')
-	for site in sites:
-		flow = getFlow(site,'1950-10-01','2019-06-01')
-		dfs.append(flow)
-	dry = pd.read_csv('./dry.csv', parse_dates=True, index_col=0)[['Q [mm/h]']]
-	dry = 24*dry.resample('D').mean()
-	dry.columns = ['00000000']
-	dfs.append(dry)
-	df = pd.concat(dfs, axis=1)
+	df = pd.read_csv('./flow.csv', index_col=0)
+	sites = df.columns.values
 
-	# x0 = [0.5, 0.5]
-	# Q = df['11475560'].values
-	# Q = Q[np.isfinite(Q)]
-	# Q = Q[:2000]
-	# print('fitting recharge')
-	# res = minimize(get_score, x0,method='Nelder-Mead', n_jobs=-1,tol=1e-6, args = (Q, True, True))
-	# print(res)
 	ress = []
 	for col in df.columns:
-	    print(col)
-	    x0 = [0.5, 0.5]
-	    Q = df[col].values
-	    Q = Q[np.isfinite(Q)]
-	    idx = np.min([len(Q), 2000])
-	    Q = Q[-idx:]
-	    res = minimize(get_score, x0,method='Nelder-Mead', tol=1e-6, args = (Q, True, True))
-	    ress.append(res)
+		print(col)
+		x0 = [0.5, 0.5]
+		Q = df[col].values
+		Q = Q[np.isfinite(Q)]
+		idx = np.min([len(Q), 2000])
+		Q = Q[-idx:]
+
+		
+		num = mp.cpu_count()
+		p = mp.Pool(num)
+		args = [(get_score,[np.random.uniform(low=0.2,high=1.5), np.random.uniform(low=0.2,high=1.5)],Q) for i in range(num)]
+		res_candidates = p.map(getmin,args)
+		idx = np.argmin([item.fun for item in res_candidates])
+		res = res_candidates[idx]
+		ress.append(res)
+
 	    
 	xs = [res.x for res in ress]
 	tempdf = pd.DataFrame(xs)
+	tempdf.index = df.columns
 	tempdf.to_csv('ress.csv')
 
 if __name__ == '__main__':
