@@ -75,8 +75,7 @@ def main():
 
     
     ress = []
-    for col in df.columns[-1:]:
-        print(col)
+    for col in df.columns:
         x0 = [0.5, 0.5]
         Q = df[col].values
         Q = Q[np.isfinite(Q)]
@@ -89,12 +88,10 @@ def main():
         idx = np.argmin([item.fun for item in res_candidates])
         res = res_candidates[idx]
         ress.append(res)
-    
 
     xs = [res.x for res in ress]
     tempdf = pd.DataFrame(xs)
     tempdf.index = df.columns
-    tempdf.to_csv('ress.csv')
     tempdf.to_csv('ress.csv')
 
 if __name__ == '__main__':
