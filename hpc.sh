@@ -9,7 +9,7 @@
 #SBATCH --partition=savio2
 #
 # Wall clock limit:
-#SBATCH --time=24:00:00
+#SBATCH --time=72:00:00
 #
 ## Command(s) to run:
 git checkout master
