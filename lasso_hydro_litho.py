@@ -53,7 +53,7 @@ def get_score(x0,Q, positive=True, logtransform=True):
         return 1e13
     rechargefit = clf.coef_
     Qfit = np.dot(H, rechargefit)
-    idx = (Q>1e-2)&(Qfit>1e-2)
+    idx = (Q>1e-10)&(Qfit>1e-10)
     Q = Q[idx]
     Qfit = Qfit[idx]
     if len(Qfit)==0:
