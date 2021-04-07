@@ -67,7 +67,7 @@ def get_score(x0,Q, positive=True, logtransform=True):
 
 def getmin(args):
     f,x0,Q = args
-    res = minimize(f, x0,method='Nelder-Mead', tol=1e-2, args = (Q))
+    res = minimize(f, x0,method='Nelder-Mead', tol=1e-3, args = (Q))
     return res
 
 def main():
@@ -82,7 +82,7 @@ def main():
         Q = Q[-idx:]
         num = mp.cpu_count()
         p = mp.Pool(num)
-        args = [(get_score,[np.random.uniform(low=0.2,high=1.5), np.random.uniform(low=0.2,high=1.5)],Q) for i in range(num)]
+        args = [(get_score,[np.random.uniform(low=0.75,high=1.5), np.random.uniform(low=0.1,high=1.0)],Q) for i in range(num)]
         res_candidates = p.map(getmin,args)
         idx = np.argmin([item.fun for item in res_candidates])
         res = res_candidates[idx]
