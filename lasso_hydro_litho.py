@@ -40,7 +40,7 @@ def get_rechargefit(x0,Q, positive=True):
         idx_train = np.random.choice(range(int(len(Q)/2),len(Q)-1), int(len(Q)*frac), replace=False)
         idx_test = list(set(np.arange(int(len(Q)/2),len(Q))).difference(set(idx_train)))
         traintest.append((idx_train, idx_test))
-    clf = linear_model.LassoCV(cv=traintest, positive=positive, tol=1e-2)
+    clf = linear_model.LassoCV(cv=traintest, positive=positive, tol=1e-3)
     try:
         clf.fit(H, Q)
     except:

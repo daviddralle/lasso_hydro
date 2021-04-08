@@ -14,4 +14,4 @@
 ## Command(s) to run:
 git checkout master
 source activate py3k
-python lasso_hydro_litho.py
+python lasso_hydro_litho_bimodal.py
