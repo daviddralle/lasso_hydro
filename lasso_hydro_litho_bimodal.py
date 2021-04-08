@@ -15,15 +15,15 @@ import sklearn
 from sklearn.metrics import r2_score
 
 def a(t, x0):
-	alpha, v0 = x0[0], x0[1]
+    alpha, v0 = x0[0], x0[1]
     return alpha*v0*(1+t*v0)**(-1-alpha)
 
 def fv(v,alpha,v0):
     return 1/(scipy.special.gamma(alpha)*v0)*np.exp(-v/v0)*(v/v0)**(alpha-1)
 
 def a_two_gammas(t, x0):
-	alpha1,v01,alpha2,v02,w1 = x0[0],x0[1],x0[2],x0[3],x0[4]
-	return w1*alpha1*v01*(1+t*v01)**(-1-alpha1) + (1-w1)*alpha2*v02*(1+t*v02)**(-1-alpha2)
+    alpha1,v01,alpha2,v02,w1 = x0[0],x0[1],x0[2],x0[3],x0[4]
+    return w1*alpha1*v01*(1+t*v01)**(-1-alpha1) + (1-w1)*alpha2*v02*(1+t*v02)**(-1-alpha2)
  
 def get_rechargefit(x0,Q,iuh,positive=True):
     t = np.arange(len(Q))
